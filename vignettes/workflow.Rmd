@@ -1,0 +1,50 @@
+---
+title: "workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Exercise04Song)
+```
+
+## Download phenology data
+```{r}
+URL = "https://phenocam.sr.unh.edu/data/archive/uiefprairie2/ROI/uiefprairie2_AG_1000_1day.csv"
+prairie.pheno <- download_phenocam(URL)
+```
+
+## Plot overall phenology data
+```{r}
+plot_phenocam(prairie.pheno)
+```
+
+## Create and visualize subset of data for leaf out
+```{r}
+spring = as.Date(c("2019-01-01","2019-06-01"))
+dat = subset(prairie.pheno,date > spring[1] & date < spring[2], select=c(date,gcc_mean,gcc_std))
+plot_phenocam(dat)
+```
+
+## Fit logistic model
+```{r}
+dat$doy = as.POSIXlt(dat$date)$yday
+par = c(0.3,0.11,-10,0.1)
+fit = fit_logistic(dat,par)
+```
+
+## Visualize model and data
+```{r}
+plot_phenocam(dat)
+lines(dat$date,pred_logistic(fit$par,dat$doy),col=2)
+```
